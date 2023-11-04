@@ -9,38 +9,47 @@ import Foundation
 
 class Element {
     var name: String = ""
-    var tNext: Double = 0
+    var tNext: Double = Double.greatestFiniteMagnitude
     var delayMean: Double = 0
     var delayDev: Double = 0
     var distribution: Distribution = .exponential
     private(set) var quantity: Int = 0
     var tCurr: Double = 0
     var state: Int = 0
-    var nextElement: Element?
+//    var nextElement: Element?
+    var nextElements: [Element]?
     private(set) static var nextId: Int = 0
     private(set) var id: Int = 0
     
     
     init() {
         initWithDelay(1)
+        name = "element\(id)"
     }
     
-    init(delay: Double){
+    init(delay: Double, name: String) {
         initWithDelay(delay)
+        self.name = name
     }
     
     private func initWithDelay(_ delay: Double) {
         delayMean = delay
-//        nextElement = nil
         id = Element.nextId
         Element.nextId += 1
-        name = "element\(id)"
     }
     
     func inAct() {}
     
     func outAct() {
         quantity += 1
+    }
+    
+    func getNextElement() -> Element? {
+        if let elements = nextElements {
+            return elements[Int.random(in: 0..<elements.count)]
+        } else {
+            return nil
+        }
     }
     
     func getDelay() -> Double {

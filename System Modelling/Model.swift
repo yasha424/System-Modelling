@@ -30,7 +30,7 @@ class Model {
                 }
             }
             
-            print("\nIt's time for event in \(nextEvent?.name ?? ""), time = \(tNext)")
+//            print("\nIt's time for event in \(nextEvent?.name ?? ""), time = \(tNext)")
             
             for element in elements {
                 element.doStatistics(delta: tNext - tCurr)
@@ -45,7 +45,7 @@ class Model {
                     element.outAct()
                 }
             }
-            printInfo()
+//            printInfo()
         }
         printResult()
     }
@@ -62,8 +62,10 @@ class Model {
             element.printResult()
             if let process = element as? Process {
                 print("Mean length of queue = \(process.meanQueue / tCurr)" +
-                      "\nFailure probability = \(Double(process.failure) / Double(process.quantity + process.failure))\n")
+                      "\nFailure probability = \(Double(process.failure) / Double(process.quantity + process.failure))" +
+                      "\nFailure = \(process.failure)")
             }
+            print()
         }
     }
 }

@@ -8,14 +8,16 @@
 import Foundation
 
 class Create: Element {
-    override init(delay: Double) {
-        super.init(delay: delay)
+    
+    override init(delay: Double, name: String) {
+        super.init(delay: delay, name: name)
         self.tNext = 0
     }
     
     override func outAct() {
         super.outAct()
         self.tNext = tCurr + getDelay()
-        nextElement?.inAct()
+        getNextElement()?.inAct()
+//        nextElement?.inAct()
     }
 }
