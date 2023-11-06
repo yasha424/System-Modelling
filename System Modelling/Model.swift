@@ -5,9 +5,12 @@
 //  Created by yasha on 03.11.2023.
 //
 
+import Foundation
+
 class Model {
     private let elements: [Element]
     private(set) var tNext, tCurr: Double
+    private static var csvString = ""
     
     init(elements: [Element]) {
         self.elements = elements
@@ -67,5 +70,34 @@ class Model {
             }
             print()
         }
+//        writeToCsv()
+    }
+    
+    func writeToCsv() {
+        let fileManager = FileManager.default
+
+        do {
+            let path = try fileManager.url(for: .downloadsDirectory, in: .allDomainsMask, appropriateFor: nil, create: true)
+            let fileURL = path.appendingPathComponent("results.csv")
+            
+            for element in elements {
+                Model.csvString += "\(element.delayMean),"
+            }
+            for element in elements {
+                if let process = element as? Process {
+                    Model.csvString += "\(process.maxQueue),"
+                }
+            }
+            for element in elements {
+                Model.csvString += "\(element.quantity),"
+                if let process = element as? Process {
+                    Model.csvString += "\(Double(process.failure) / Double(process.failure + process.quantity)),\(process.meanQueue / tCurr),"
+                }
+            }
+            Model.csvString.removeLast()
+            Model.csvString += "\n"
+
+            try Model.csvString.write(to: fileURL, atomically: true, encoding: .utf8)
+        } catch {}
     }
 }

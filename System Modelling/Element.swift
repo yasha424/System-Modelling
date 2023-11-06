@@ -1,5 +1,5 @@
 //
-//  Event.swift
+//  Element.swift
 //  System Modelling
 //
 //  Created by yasha on 03.11.2023.
