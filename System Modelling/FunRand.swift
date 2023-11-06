@@ -5,7 +5,7 @@
 //  Created by yasha on 03.11.2023.
 //
 
-import GameplayKit
+import Darwin
 
 struct FunRand {
     static func exponential(timeMean: Double) -> Double {

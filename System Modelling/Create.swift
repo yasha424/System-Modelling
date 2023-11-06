@@ -5,8 +5,6 @@
 //  Created by yasha on 03.11.2023.
 //
 
-import Foundation
-
 class Create: Element {
     
     override init(delay: Double, name: String) {
@@ -18,6 +16,5 @@ class Create: Element {
         super.outAct()
         self.tNext = tCurr + getDelay()
         getNextElement()?.inAct()
-//        nextElement?.inAct()
     }
 }

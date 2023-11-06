@@ -5,8 +5,6 @@
 //  Created by yasha on 03.11.2023.
 //
 
-import Foundation
-
 class Element {
     var name: String = ""
     var tNext: Double = Double.greatestFiniteMagnitude
@@ -16,7 +14,6 @@ class Element {
     private(set) var quantity: Int = 0
     var tCurr: Double = 0
     var state: Int = 0
-//    var nextElement: Element?
     var nextElements: [Element]?
     private(set) static var nextId: Int = 0
     private(set) var id: Int = 0

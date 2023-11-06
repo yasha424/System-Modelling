@@ -5,17 +5,13 @@
 //  Created by yasha on 03.11.2023.
 //
 
-import Foundation
-
 class Model {
     private let elements: [Element]
     private(set) var tNext, tCurr: Double
-//    var event: Int
     
     init(elements: [Element]) {
         self.elements = elements
         tNext = 0
-//        event = 0
         tCurr = tNext
     }
     
@@ -30,24 +26,27 @@ class Model {
                 }
             }
             
-//            print("\nIt's time for event in \(nextEvent?.name ?? ""), time = \(tNext)")
-            
+            if let event = nextEvent {
+                print("\nIt's time for event in \(event.name), time = \(tNext)")
+            }
+                        
             for element in elements {
                 element.doStatistics(delta: tNext - tCurr)
             }
+            
             tCurr = tNext
             for element in elements {
                 element.tCurr = tCurr
             }
-            nextEvent?.outAct()
+            
             for element in elements {
                 if element.tNext == tCurr {
                     element.outAct()
                 }
             }
-//            printInfo()
+            printInfo()
         }
-        printResult()
+        printResult(time: time)
     }
     
     func printInfo() {
@@ -56,14 +55,15 @@ class Model {
         }
     }
     
-    func printResult() {
+    func printResult(time: Double) {
         print("\n-------------RESULTS-------------")
         for element in elements {
             element.printResult()
             if let process = element as? Process {
                 print("Mean length of queue = \(process.meanQueue / tCurr)" +
                       "\nFailure probability = \(Double(process.failure) / Double(process.quantity + process.failure))" +
-                      "\nFailure = \(process.failure)")
+                      "\nFailure = \(process.failure)" +
+                      "\nMean load time = \(process.totalLoadTime / time)")
             }
             print()
         }

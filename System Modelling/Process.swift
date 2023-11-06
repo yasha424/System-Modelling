@@ -5,18 +5,16 @@
 //  Created by yasha on 03.11.2023.
 //
 
-import Foundation
-
 class Process: Element {
-    var queue, maxQueue, failure: Int
-    private(set) var meanQueue: Double
+    private(set) var queue: Int = 0
+    private(set) var maxQueue: Int = 0
+    private(set) var failure: Int = 0
+    private(set) var meanQueue: Double = 0
     private(set) var channelsStates = [Int]()
     private(set) var channelsTNext = [Double]()
+    private(set) var totalLoadTime: Double = 0
     
-    init(delay: Double, name: String, maxQueue: Int, channels: Int) {
-        self.queue = 0
-        self.failure = 0
-        self.meanQueue = 0
+    init(delay: Double, name: String, maxQueue: Int, channels: UInt) {
         self.maxQueue = maxQueue
         
         for _ in 0..<channels {
@@ -28,10 +26,13 @@ class Process: Element {
     }
         
     override func inAct() {
+        let delay = getDelay()
+
         if !channelsStates.isEmpty {
             if let availableChannel = channelsStates.firstIndex(where: { $0 == 0 }) {
                 channelsStates[availableChannel] = 1
-                channelsTNext[availableChannel] = tCurr + getDelay()
+                channelsTNext[availableChannel] = tCurr + delay
+                totalLoadTime += delay
                 tNext = channelsTNext.min() ?? Double.greatestFiniteMagnitude
             } else {
                 if queue < maxQueue {
@@ -42,7 +43,8 @@ class Process: Element {
             }
         } else if state == 0 {
             state = 1
-            tNext = tCurr + getDelay()
+            tNext = tCurr + delay
+            totalLoadTime += delay
         } else {
             if queue < maxQueue {
                 queue += 1
@@ -55,15 +57,16 @@ class Process: Element {
     override func outAct() {
         super.outAct()
         
+        let delay = getDelay()
         if !channelsStates.isEmpty {
             if let currChannel = channelsTNext.firstIndex(where: { $0 == tCurr }) {
                 channelsStates[currChannel] = 0
                 channelsTNext[currChannel] = Double.greatestFiniteMagnitude
-//                tNext = channelsTNext.min() ?? Double.greatestFiniteMagnitude
                 if queue > 0 {
                     queue -= 1
                     channelsStates[currChannel] = 1
-                    channelsTNext[currChannel] = tCurr + getDelay()
+                    channelsTNext[currChannel] = tCurr + delay
+                    totalLoadTime += delay
                 }
                 tNext = channelsTNext.min() ?? Double.greatestFiniteMagnitude
             }
@@ -73,11 +76,11 @@ class Process: Element {
             if queue > 0 {
                 queue -= 1
                 state = 1
-                tNext = tCurr + getDelay()
+                tNext = tCurr + delay
+                totalLoadTime += delay
             }
         }
         getNextElement()?.inAct()
-//        nextElement?.inAct()
     }
     
     override func printInfo() {
