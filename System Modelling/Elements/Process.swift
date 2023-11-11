@@ -14,7 +14,7 @@ class Process: Element {
     private(set) var channelsTNext = [Double]()
     private(set) var totalLoadTime: Double = 0
     
-    init(delay: Double, name: String, maxQueue: Int, channels: UInt) {
+    init(delay: Double, name: String, maxQueue: Int, channels: UInt, chooseBy type: NextElementsChooseType) {
         self.maxQueue = maxQueue
         
         for _ in 0..<channels {
@@ -22,7 +22,7 @@ class Process: Element {
             channelsTNext.append(Double.greatestFiniteMagnitude)
         }
 
-        super.init(delay: delay, name: name)
+        super.init(delay: delay, name: name, chooseBy: type)
     }
         
     override func inAct() {
@@ -90,5 +90,13 @@ class Process: Element {
     
     override func doStatistics(delta: Double) {
         meanQueue += Double(queue) * delta
+    }
+    
+    override func isFree() -> Bool {
+        if !channelsStates.isEmpty {
+            return channelsStates.contains(0) ? true : false
+        } else {
+            return state == 0
+        }
     }
 }

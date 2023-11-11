@@ -7,8 +7,8 @@
 
 class Create: Element {
     
-    override init(delay: Double, name: String) {
-        super.init(delay: delay, name: name)
+    override init(delay: Double, name: String, chooseBy type: NextElementsChooseType) {
+        super.init(delay: delay, name: name, chooseBy: type)
         self.tNext = 0
     }
     
