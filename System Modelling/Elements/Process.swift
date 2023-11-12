@@ -54,10 +54,10 @@ class Process: Element {
         }
     }
     
-    override func outAct() {
+    override func outAct(delay: Double? = nil) {
         super.outAct()
         
-        let delay = getDelay()
+        let delay = delay == nil ? getDelay() : delay!
         if !channelsStates.isEmpty {
             if let currChannel = channelsTNext.firstIndex(where: { $0 == tCurr }) {
                 channelsStates[currChannel] = 0
@@ -85,7 +85,7 @@ class Process: Element {
     
     override func printInfo() {
         super.printInfo()
-        print("failure = \(failure)")
+        print("queue = \(queue), failure = \(failure)")
     }
     
     override func doStatistics(delta: Double) {

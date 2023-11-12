@@ -12,9 +12,9 @@ class Create: Element {
         self.tNext = 0
     }
     
-    override func outAct() {
+    override func outAct(delay: Double? = nil) {
         super.outAct()
-        self.tNext = tCurr + getDelay()
+        self.tNext = tCurr + (delay == nil ? getDelay() : delay!)
         getNextElement()?.inAct()
     }
 }

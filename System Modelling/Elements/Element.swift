@@ -40,7 +40,7 @@ class Element {
     
     func inAct() {}
     
-    func outAct() {
+    func outAct(delay: Double? = nil) {
         quantity += 1
     }
     
@@ -55,11 +55,29 @@ class Element {
                 return try getNextElementByPriority()
             case .probability:
                 return try getNextElementByProbability()
+            case .byQueueLength:
+                return getNextElementByQueueLength()
             }
         } catch {
             print(error)
         }
         return nil
+    }
+    
+    func getNextElementByQueueLength() -> Element? {
+        guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
+        
+        let nextProcesses = nextElements.map { $0.element as? Process }
+        guard !nextProcesses.contains(where: { $0 == nil }) else { return nil }
+        
+//        if let freeProcess = nextProcesses.first(where: {
+//            $0!.queue == 0 && $0!.channelsStates.contains(0)
+//        }) {
+//            return freeProcess
+//        }
+        let sortedProcesses = nextProcesses.sorted(by: { $0!.queue < $1!.queue })
+        
+        return sortedProcesses.first!
     }
     
     func getNextElementByPriority() throws -> Element? {
