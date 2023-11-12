@@ -6,7 +6,7 @@
 //
 
 class Process: Element {
-    private(set) var queue: Int = 0
+    var queue: Int = 0
     private(set) var maxQueue: Int = 0
     private(set) var failure: Int = 0
     private(set) var meanQueue: Double = 0

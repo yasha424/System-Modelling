@@ -40,17 +40,16 @@ func bankTask() {
     let cashier2 = Process(delay: 1.0, name: "Cashier-2", maxQueue: 3, channels: 1, chooseBy: .priority)
     
     clients.nextElements = [
-        NextElement(element: cashier1, priority: 2),
-        NextElement(element: cashier2, priority: 1)
+        NextElement(element: cashier1),
+        NextElement(element: cashier2)
     ]
     
     cashier1.distribution = .normal
     cashier1.delayDev = 0.3
-//    cashier1.inAct()
 
     cashier2.distribution = .normal
     cashier2.delayDev = 0.3
-//    cashier2.inAct()
+
     for _ in 1...3 {
         cashier1.inAct()
         cashier2.inAct()
@@ -61,11 +60,10 @@ func bankTask() {
     cashier2.distribution = .exponential
     cashier2.delayMean = 0.3
     
-//    clients.tNext = 0.1
-    clients.outAct(delay: 0.1)
-    
+    clients.outAct()
+
     let model = Model(elements: [clients, cashier1, cashier2])
-    model.simulate(forTime: 1000)
+    model.simulate(forTime: 1000, swapDifference: 2)
 }
 
 func main() {

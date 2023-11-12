@@ -11,6 +11,7 @@ class Model {
     private let elements: [Element]
     private(set) var tNext, tCurr: Double
     private static var csvString = ""
+    private var swapCount: Int = 0
     
     init(elements: [Element]) {
         self.elements = elements
@@ -18,7 +19,7 @@ class Model {
         tCurr = tNext
     }
     
-    func simulate(forTime time: Double) {
+    func simulate(forTime time: Double, swapDifference: Int? = nil) {
         while tCurr < time {
             var nextEvent: Element?
             tNext = Double.greatestFiniteMagnitude
@@ -47,9 +48,30 @@ class Model {
                     element.outAct()
                 }
             }
+
+            if let swapDifference = swapDifference {
+                tryToSwapQueue(swapDifference)
+            }
+
             printInfo()
         }
-        printResult(time: time)
+        printResult()
+    }
+    
+    func tryToSwapQueue(_ swapDifference: Int) {
+        let processes = elements.filter { $0 is Process }.map { $0 as! Process }
+        
+        for process in processes {
+            for anotherProcess in processes {
+                if anotherProcess.name == process.name { continue }
+                if process.queue - anotherProcess.queue >= 2 {
+                    print("Swaped item from \(process.name) to \(anotherProcess.name)")
+                    swapCount += 1
+                    process.queue -= 1
+                    anotherProcess.queue += 1
+                }
+            }
+        }
     }
     
     func printInfo() {
@@ -58,7 +80,7 @@ class Model {
         }
     }
     
-    func printResult(time: Double) {
+    func printResult() {
         print("\n-------------RESULTS-------------")
         for element in elements {
             element.printResult()
@@ -66,11 +88,49 @@ class Model {
                 print("Mean length of queue = \(process.meanQueue / tCurr)" +
                       "\nFailure probability = \(Double(process.failure) / Double(process.quantity + process.failure))" +
                       "\nFailure = \(process.failure)" +
-                      "\nMean load time = \(process.totalLoadTime / time)")
+                      "\nMean load time = \(process.totalLoadTime / tCurr)")
             }
             print()
         }
+        
+        print("Mean clients count in bank = \(getMeanClientsCountInBank())" +
+              "\nMean time between leaving = \(getMeanTimeBetweenLeaving())" +
+              "\nMean client time in bank = \(getMeanClientsTimeInBank())" +
+              "\nFailure probabilty in bank = \(getFailureProbabilityInBank())" +
+              "\nSwaps count = \(swapCount)"
+        )
 //        writeToCsv()
+    }
+    
+    func getMeanClientsCountInBank() -> Double {
+        return elements.filter { $0 is Process }.map { $0 as! Process }.reduce(0) { partialResult, process in
+//            let meanClients = process.totalLoadTime / Double(process.quantity)
+            return partialResult + (process.meanQueue + process.totalLoadTime) / tCurr
+        }
+    }
+    
+    func getMeanTimeBetweenLeaving() -> Double {
+        let processes = elements.filter { $0 is Process }.map { $0 as! Process }
+        return tCurr / processes.reduce(0) { partialResult, process in
+            return partialResult + Double(process.quantity)
+        }
+    }
+    
+    func getMeanClientsTimeInBank() -> Double {
+        let processes = elements.filter { $0 is Process }.map { $0 as! Process }
+        let totalClientsTimeInBank = processes.reduce(0) { partialResult, process in
+            return partialResult + process.totalLoadTime + process.meanQueue
+        }
+        return totalClientsTimeInBank / processes.reduce(0) { $0 + Double($1.quantity) }
+    }
+    
+    func getFailureProbabilityInBank() -> Double {
+        let processes = elements.filter { $0 is Process }.map { $0 as! Process }
+        
+        let sumOfFailureProbability = processes.reduce(0) {
+            $0 + Double($1.failure) / Double($1.quantity + $1.failure)
+        }
+        return sumOfFailureProbability / Double(processes.count)
     }
     
     func writeToCsv() {

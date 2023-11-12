@@ -67,17 +67,17 @@ class Element {
     func getNextElementByQueueLength() -> Element? {
         guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
         
-        let nextProcesses = nextElements.map { $0.element as? Process }
-        guard !nextProcesses.contains(where: { $0 == nil }) else { return nil }
+        let nextProcesses = nextElements.filter { $0.element is Process }.map { $0.element as! Process }
         
-//        if let freeProcess = nextProcesses.first(where: {
-//            $0!.queue == 0 && $0!.channelsStates.contains(0)
-//        }) {
-//            return freeProcess
-//        }
-        let sortedProcesses = nextProcesses.sorted(by: { $0!.queue < $1!.queue })
+        if let freeProcess = nextProcesses.first(where: {
+            $0.queue == 0 && ($0.channelsStates.contains(0))
+        }) {
+            return freeProcess
+        }
         
-        return sortedProcesses.first!
+        let sortedProcesses = nextProcesses.sorted(by: { $0.queue < $1.queue })
+        
+        return sortedProcesses.first
     }
     
     func getNextElementByPriority() throws -> Element? {
