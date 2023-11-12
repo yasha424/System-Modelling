@@ -5,7 +5,16 @@
 //  Created by yasha on 03.11.2023.
 //
 
-class Element {
+class ID {
+    static private var id = -1
+    
+    static func getId() -> Int {
+        id += 1
+        return id
+    }
+}
+
+class Element<T> {
     var name: String = ""
     var tNext: Double = Double.greatestFiniteMagnitude
     var delayMean: Double = 0
@@ -14,9 +23,10 @@ class Element {
     private(set) var quantity: Int = 0
     var tCurr: Double = 0
     var state: Int = 0
-    var nextElements: [NextElement]?
+    var item: T? = nil
+    var nextElements: [NextElement<T>]?
     let nextElementsChooseType: NextElementsChooseType
-    private(set) static var nextId: Int = 0
+//    private(set) static var nextId: Int = 0
     private(set) var id: Int = 0
     
     
@@ -34,13 +44,13 @@ class Element {
     
     private func initWithDelay(_ delay: Double) {
         delayMean = delay
-        id = Element.nextId
-        Element.nextId += 1
+        id = ID.getId()
+//        Element.nextId += 1
     }
     
-    func inAct() {}
+    func inAct(_ item: T? = nil) {}
     
-    func outAct(delay: Double? = nil) {
+    func outAct() {
         quantity += 1
     }
     
@@ -67,15 +77,15 @@ class Element {
     func getNextElementByQueueLength() -> Element? {
         guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
         
-        let nextProcesses = nextElements.filter { $0.element is Process }.map { $0.element as! Process }
+        let nextProcesses = nextElements.filter { $0.element is Process<T> }.map { $0.element as! Process<T> }
         
         if let freeProcess = nextProcesses.first(where: {
-            $0.queue == 0 && ($0.channelsStates.contains(0))
+            $0.queue.count == 0 && ($0.channelsStates.contains(0))
         }) {
             return freeProcess
         }
         
-        let sortedProcesses = nextProcesses.sorted(by: { $0.queue < $1.queue })
+        let sortedProcesses = nextProcesses.sorted(by: { $0.queue.count < $1.queue.count })
         
         return sortedProcesses.first
     }

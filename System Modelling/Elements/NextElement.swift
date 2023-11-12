@@ -11,12 +11,12 @@ enum NextElementError: Error {
     case probabilitySumNotEqualToOne
 }
 
-class NextElement {
-    let element: Element
+class NextElement<T> {
+    let element: Element<T>
     let priority: Int?
     let probability: Double?
     
-    init(element: Element, priority: Int? = nil, probability: Double? = nil) {
+    init(element: Element<T>, priority: Int? = nil, probability: Double? = nil) {
         self.element = element
         self.priority = priority
         self.probability = probability

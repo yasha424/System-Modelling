@@ -7,13 +7,13 @@
 
 import Foundation
 
-class Model {
-    private let elements: [Element]
+class Model<T> {
+    private let elements: [Element<T>]
     private(set) var tNext, tCurr: Double
-    private static var csvString = ""
+//    private static var csvString = ""
     private var swapCount: Int = 0
     
-    init(elements: [Element]) {
+    init(elements: [Element<T>]) {
         self.elements = elements
         tNext = 0
         tCurr = tNext
@@ -21,7 +21,7 @@ class Model {
     
     func simulate(forTime time: Double, swapDifference: Int? = nil) {
         while tCurr < time {
-            var nextEvent: Element?
+            var nextEvent: Element<T>?
             tNext = Double.greatestFiniteMagnitude
             for element in elements {
                 if element.tNext < tNext {
@@ -64,11 +64,12 @@ class Model {
         for process in processes {
             for anotherProcess in processes {
                 if anotherProcess.name == process.name { continue }
-                if process.queue - anotherProcess.queue >= 2 {
+                if process.queue.count - anotherProcess.queue.count >= swapDifference {
                     print("Swaped item from \(process.name) to \(anotherProcess.name)")
                     swapCount += 1
-                    process.queue -= 1
-                    anotherProcess.queue += 1
+                    anotherProcess.queue.append(process.queue.removeLast())
+//                    process.queue -= 1
+//                    anotherProcess.queue += 1
                 }
             }
         }
@@ -133,31 +134,31 @@ class Model {
         return sumOfFailureProbability / Double(processes.count)
     }
     
-    func writeToCsv() {
-        let fileManager = FileManager.default
-
-        do {
-            let path = try fileManager.url(for: .downloadsDirectory, in: .allDomainsMask, appropriateFor: nil, create: true)
-            let fileURL = path.appendingPathComponent("results.csv")
-            
-            for element in elements {
-                Model.csvString += "\(element.delayMean),"
-            }
-            for element in elements {
-                if let process = element as? Process {
-                    Model.csvString += "\(process.maxQueue),"
-                }
-            }
-            for element in elements {
-                Model.csvString += "\(element.quantity),"
-                if let process = element as? Process {
-                    Model.csvString += "\(Double(process.failure) / Double(process.failure + process.quantity)),\(process.meanQueue / tCurr),"
-                }
-            }
-            Model.csvString.removeLast()
-            Model.csvString += "\n"
-
-            try Model.csvString.write(to: fileURL, atomically: true, encoding: .utf8)
-        } catch {}
-    }
+//    func writeToCsv() {
+//        let fileManager = FileManager.default
+//
+//        do {
+//            let path = try fileManager.url(for: .downloadsDirectory, in: .allDomainsMask, appropriateFor: nil, create: true)
+//            let fileURL = path.appendingPathComponent("results.csv")
+//            
+//            for element in elements {
+//                Model.csvString += "\(element.delayMean),"
+//            }
+//            for element in elements {
+//                if let process = element as? Process {
+//                    Model.csvString += "\(process.maxQueue),"
+//                }
+//            }
+//            for element in elements {
+//                Model.csvString += "\(element.quantity),"
+//                if let process = element as? Process {
+//                    Model.csvString += "\(Double(process.failure) / Double(process.failure + process.quantity)),\(process.meanQueue / tCurr),"
+//                }
+//            }
+//            Model.csvString.removeLast()
+//            Model.csvString += "\n"
+//
+//            try Model.csvString.write(to: fileURL, atomically: true, encoding: .utf8)
+//        } catch {}
+//    }
 }
