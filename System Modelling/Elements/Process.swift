@@ -15,21 +15,21 @@ class Process<T>: Element<T> {
     private(set) var channelsTNext = [Double]()
     private(set) var channelsItems = [T?]()
     private(set) var totalLoadTime: Double = 0
+    var getDelay: (_ item: T?) -> Double
     
-    init(delay: Double, name: String, maxQueue: Int, channels: UInt, chooseBy type: NextElementsChooseType) {
+    init(name: String, maxQueue: Int, channels: UInt, chooseBy type: NextElementsChooseType, delay: @escaping (_ item: T?) -> Double) {
         self.maxQueue = maxQueue
+        self.getDelay = delay
         
-        for _ in 0..<channels {
-            channelsStates.append(0)
-            channelsTNext.append(Double.greatestFiniteMagnitude)
-            channelsItems.append(nil)
-        }
+        channelsStates = Array(repeating: 0, count: Int(channels))
+        channelsTNext = Array(repeating: Double.greatestFiniteMagnitude, count: Int(channels))
+        channelsItems = Array(repeating: nil, count: Int(channels))
 
-        super.init(delay: delay, name: name, chooseBy: type)
+        super.init(delay: 1, name: name, chooseBy: type)
     }
         
     override func inAct(_ item: T? = nil) {
-        let delay = getDelay()
+        let delay = getDelay(item)
 
         if !channelsStates.isEmpty {
             if let availableChannel = channelsStates.firstIndex(where: { $0 == 0 }) {
@@ -62,13 +62,14 @@ class Process<T>: Element<T> {
     override func outAct() {
         super.outAct()
         
-        let delay = getDelay()
+//        let delay = getDelay()
         var currItem: T? = nil
         if !channelsStates.isEmpty {
             if let currChannel = channelsTNext.firstIndex(where: { $0 == tCurr }) {
                 channelsStates[currChannel] = 0
                 channelsTNext[currChannel] = Double.greatestFiniteMagnitude
                 currItem = channelsItems[currChannel]
+                let delay = getDelay(currItem)
                 channelsItems[currChannel] = nil
                 if queue.count > 0 {
                     channelsStates[currChannel] = 1
@@ -85,11 +86,15 @@ class Process<T>: Element<T> {
             if queue.count > 0 {
                 self.item = queue.removeFirst()
                 state = 1
+                let delay = getDelay(self.item)
                 tNext = tCurr + delay
                 totalLoadTime += delay
             }
         }
-        getNextElement()?.inAct(currItem)
+        if let nextElement = getNextElement(currItem) {
+            nextElement.element.inAct(nextElement.itemGenerator == nil ? currItem : nextElement.itemGenerator?())
+        }
+//        getNextElement(currItem)?.inAct(currItem)
     }
     
     override func printInfo() {

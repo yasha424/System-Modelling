@@ -12,13 +12,20 @@ enum NextElementError: Error {
 }
 
 class NextElement<T> {
+    typealias ConditionFunc = ((_ item: T) -> Bool)?
+    typealias ItemGenerator = () -> T?
+    
     let element: Element<T>
     let priority: Int?
     let probability: Double?
+    let condition: ConditionFunc
+    let itemGenerator: ItemGenerator?
     
-    init(element: Element<T>, priority: Int? = nil, probability: Double? = nil) {
+    init(element: Element<T>, priority: Int? = nil, probability: Double? = nil, condition: ConditionFunc = nil, itemGenerator: ItemGenerator? = nil) {
         self.element = element
         self.priority = priority
         self.probability = probability
+        self.condition = condition
+        self.itemGenerator = itemGenerator
     }
 }

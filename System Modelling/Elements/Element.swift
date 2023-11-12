@@ -54,11 +54,11 @@ class Element<T> {
         quantity += 1
     }
     
-    func getNextElement() -> Element? {
-        return getNextElement(by: nextElementsChooseType)
+    func getNextElement(_ item: T? = nil) -> NextElement<T>? {
+        return getNextElement(by: nextElementsChooseType, item)
     }
     
-    func getNextElement(by type: NextElementsChooseType) -> Element? {
+    func getNextElement(by type: NextElementsChooseType, _ item: T?) -> NextElement<T>? {
         do {
             switch type {
             case .priority:
@@ -67,6 +67,8 @@ class Element<T> {
                 return try getNextElementByProbability()
             case .byQueueLength:
                 return getNextElementByQueueLength()
+            case .byCondition:
+                return getNextElementByCondition(item)
             }
         } catch {
             print(error)
@@ -74,23 +76,42 @@ class Element<T> {
         return nil
     }
     
-    func getNextElementByQueueLength() -> Element? {
+    func getNextElementByCondition(_ item: T?) -> NextElement<T>? {
         guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
         
-        let nextProcesses = nextElements.filter { $0.element is Process<T> }.map { $0.element as! Process<T> }
+        for nextElement in nextElements {
+            if let condition = nextElement.condition, let item = item, condition(item) {
+                return nextElement
+            }
+        }
+        return nil
+    }
+    
+    func getNextElementByQueueLength() -> NextElement<T>? {
+        guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
+        
+        let nextProcesses = nextElements.filter { $0.element is Process<T> }
         
         if let freeProcess = nextProcesses.first(where: {
-            $0.queue.count == 0 && ($0.channelsStates.contains(0))
+            if let process = $0.element as? Process<T> {
+                return process.queue.count == 0 && process.channelsStates.contains(0)
+            }
+            return false
         }) {
             return freeProcess
         }
         
-        let sortedProcesses = nextProcesses.sorted(by: { $0.queue.count < $1.queue.count })
+        let sortedProcesses = nextProcesses.sorted {
+            if let first = $0.element as? Process<T>, let second = $1.element as? Process<T> {
+                return first.queue.count < second.queue.count
+            }
+            return true
+        }
         
         return sortedProcesses.first
     }
     
-    func getNextElementByPriority() throws -> Element? {
+    func getNextElementByPriority() throws -> NextElement<T>? {
         guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
         
         if nextElements.contains(where: { $0.priority == nil }) {
@@ -100,14 +121,14 @@ class Element<T> {
         let sortedElements = nextElements.sorted(by: { $0.priority! > $1.priority! })
         for element in sortedElements {
             if element.element.isFree() {
-                return element.element
+                return element
             }
         }
         
-        return sortedElements.first?.element
+        return sortedElements.first
     }
     
-    func getNextElementByProbability() throws -> Element? {
+    func getNextElementByProbability() throws -> NextElement<T>? {
         guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
         
         if nextElements.contains(where: { $0.probability == nil }) {
@@ -121,7 +142,7 @@ class Element<T> {
         for nextElement in nextElements {
             sum += nextElement.probability!
             if randomValue <= sum {
-                return nextElement.element
+                return nextElement
             }
         }
         

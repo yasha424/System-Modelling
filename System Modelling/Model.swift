@@ -94,16 +94,16 @@ class Model<T> {
             print()
         }
         
-        print("Mean clients count in bank = \(getMeanClientsCountInBank())" +
+        print("Mean clients count = \(getMeanClientsCountInModel())" +
               "\nMean time between leaving = \(getMeanTimeBetweenLeaving())" +
-              "\nMean client time in bank = \(getMeanClientsTimeInBank())" +
-              "\nFailure probabilty in bank = \(getFailureProbabilityInBank())" +
+              "\nMean client time in model = \(getMeanClientsTimeInModel())" +
+              "\nFailure probabilty = \(getFailureProbability())" +
               "\nSwaps count = \(swapCount)"
         )
 //        writeToCsv()
     }
     
-    func getMeanClientsCountInBank() -> Double {
+    func getMeanClientsCountInModel() -> Double {
         return elements.filter { $0 is Process }.map { $0 as! Process }.reduce(0) { partialResult, process in
 //            let meanClients = process.totalLoadTime / Double(process.quantity)
             return partialResult + (process.meanQueue + process.totalLoadTime) / tCurr
@@ -117,7 +117,7 @@ class Model<T> {
         }
     }
     
-    func getMeanClientsTimeInBank() -> Double {
+    func getMeanClientsTimeInModel() -> Double {
         let processes = elements.filter { $0 is Process }.map { $0 as! Process }
         let totalClientsTimeInBank = processes.reduce(0) { partialResult, process in
             return partialResult + process.totalLoadTime + process.meanQueue
@@ -125,7 +125,7 @@ class Model<T> {
         return totalClientsTimeInBank / processes.reduce(0) { $0 + Double($1.quantity) }
     }
     
-    func getFailureProbabilityInBank() -> Double {
+    func getFailureProbability() -> Double {
         let processes = elements.filter { $0 is Process }.map { $0 as! Process }
         
         let sumOfFailureProbability = processes.reduce(0) {

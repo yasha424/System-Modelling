@@ -31,7 +31,7 @@ class Create<T>: Element<T> {
         super.outAct()
         let (delay, item) = getDelay()
         self.tNext = tCurr + delay
-        getNextElement()?.inAct(item)
+        getNextElement()?.element.inAct(item)
     }
     
     func getDelay() -> (Double, T?) {

@@ -32,4 +32,17 @@ struct FunRand {
         // конвертуємо z1 зі стандартоного нормального розподілу в наш нормальний розподіл
         return z1 * timeDeviation + timeMean
     }
+    
+    static func erlang(timeMean: Double, k: Int) -> Double {
+        var product = 1.0
+        for _ in 0..<k {
+            product *= FunRand.uniform(timeMin: 0, timeMax: 1)
+        }
+        
+        return -timeMean * log(product)
+    }
+    
+    static func constant(_ time: Double) -> Double {
+        return time
+    }
 }
