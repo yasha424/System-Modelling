@@ -94,7 +94,7 @@ class Process: Element {
     
     override func isFree() -> Bool {
         if !channelsStates.isEmpty {
-            return channelsStates.contains(0) ? true : false
+            return channelsStates.contains(0) || queue < maxQueue ? true : false
         } else {
             return state == 0
         }

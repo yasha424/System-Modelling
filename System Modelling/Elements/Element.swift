@@ -46,26 +46,28 @@ class Element {
     
     func getNextElement() -> Element? {
         return getNextElement(by: nextElementsChooseType)
-//
-//        if let nextElements = nextElements {
-//            return nextElements[Int.random(in: 0..<nextElements.count)].element
-//        } else {
-//            return nil
-//        }
     }
     
     func getNextElement(by type: NextElementsChooseType) -> Element? {
-        switch type {
-        case .priority:
-            return getNextElementByPriority()
-        case .probability:
-            return getNextElementByProbability()
+        do {
+            switch type {
+            case .priority:
+                return try getNextElementByPriority()
+            case .probability:
+                return try getNextElementByProbability()
+            }
+        } catch {
+            print(error)
         }
+        return nil
     }
     
-    func getNextElementByPriority() -> Element? {
-        guard let nextElements = nextElements, nextElements.count > 0,
-              !nextElements.contains(where: { $0.priority == nil }) else { return nil }
+    func getNextElementByPriority() throws -> Element? {
+        guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
+        
+        if nextElements.contains(where: { $0.priority == nil }) {
+            throw NextElementError.undefinedPriority
+        }
         
         let sortedElements = nextElements.sorted(by: { $0.priority! > $1.priority! })
         for element in sortedElements {
@@ -77,10 +79,14 @@ class Element {
         return sortedElements.first?.element
     }
     
-    func getNextElementByProbability() -> Element? {
-        guard let nextElements = nextElements, nextElements.count > 0,
-              !nextElements.contains(where: { $0.probability == nil }),
-              nextElements.reduce(0, { $0 + $1.probability! }) == 1 else { return nil }
+    func getNextElementByProbability() throws -> Element? {
+        guard let nextElements = nextElements, nextElements.count > 0 else { return nil }
+        
+        if nextElements.contains(where: { $0.probability == nil }) {
+            throw NextElementError.undefinedProbability
+        } else if nextElements.reduce(0, { $0 + $1.probability! }) != 1 {
+            throw NextElementError.probabilitySumNotEqualToOne
+        }
         
         var sum = 0.0
         let randomValue = Double.random(in: 0...1)
@@ -115,5 +121,5 @@ class Element {
     
     func doStatistics(delta: Double) {}
     
-    func isFree() -> Bool { return false }
+    func isFree() -> Bool { return true }
 }
