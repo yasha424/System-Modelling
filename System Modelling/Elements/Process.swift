@@ -7,7 +7,6 @@
 
 class Process<T>: Element<T> {
     var queue: [T?] = []
-//    private var item: T
     private(set) var maxQueue: Int = 0
     private(set) var failure: Int = 0
     private(set) var meanQueue: Double = 0
@@ -62,7 +61,6 @@ class Process<T>: Element<T> {
     override func outAct() {
         super.outAct()
         
-//        let delay = getDelay()
         var currItem: T? = nil
         if !channelsStates.isEmpty {
             if let currChannel = channelsTNext.firstIndex(where: { $0 == tCurr }) {
@@ -94,7 +92,6 @@ class Process<T>: Element<T> {
         if let nextElement = getNextElement(currItem) {
             nextElement.element.inAct(nextElement.itemGenerator == nil ? currItem : nextElement.itemGenerator?())
         }
-//        getNextElement(currItem)?.inAct(currItem)
     }
     
     override func printInfo() {

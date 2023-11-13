@@ -99,9 +99,9 @@ func hospitalTask() {
             case 1:
                 return FunRand.constant(15)
             case 2:
-                return FunRand.constant(15)
+                return FunRand.constant(40)
             case 3:
-                return FunRand.constant(15)
+                return FunRand.constant(30)
             default:
                 return Double.greatestFiniteMagnitude
             }
@@ -145,6 +145,15 @@ func hospitalTask() {
         FunRand.erlang(timeMean: 4, k: 2)
     }
     
+    let goingToRegistration = Process<Patient>(
+        name: "Going to Registration",
+        maxQueue: Int.max,
+        channels: 1000,
+        chooseBy: .probability
+    ) { _ in
+        FunRand.uniform(timeMin: 2, timeMax: 5)
+    }
+    
     let dispose = Process<Patient>(
         name: "Dispose",
         maxQueue: Int.max,
@@ -166,15 +175,19 @@ func hospitalTask() {
     labRegistration.nextElements = [.init(element: analysis, probability: 1)]
     
     analysis.nextElements = [
-        .init(element: registration, probability: 0.5, itemGenerator: { Patient(type: 1) }),
+        .init(element: goingToRegistration, probability: 0.5, itemGenerator: { Patient(type: 1) }),
         .init(element: dispose, probability: 0.5)
     ]
+    
+    goingToRegistration.nextElements = [.init(element: registration, probability: 1)]
             
-    let model = Model(elements: [patients, registration, goingToWards, goingToLab, labRegistration, analysis])
+    let model = Model(elements: [patients, registration, goingToWards, goingToLab, labRegistration, analysis, goingToRegistration])
     model.simulate(forTime: 10000)
+    print("Mean time between coming to laboratory = \(model.tCurr / Double(goingToLab.quantity))")
 }
 
 func main() {
+//    bankTask()
     hospitalTask()
 }
 

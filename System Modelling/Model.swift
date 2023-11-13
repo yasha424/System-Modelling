@@ -68,8 +68,6 @@ class Model<T> {
                     print("Swaped item from \(process.name) to \(anotherProcess.name)")
                     swapCount += 1
                     anotherProcess.queue.append(process.queue.removeLast())
-//                    process.queue -= 1
-//                    anotherProcess.queue += 1
                 }
             }
         }
@@ -94,16 +92,16 @@ class Model<T> {
             print()
         }
         
-        print("Mean clients count = \(getMeanClientsCountInModel())" +
+        print("Mean items count = \(getMeanItemsCountInModel())" +
               "\nMean time between leaving = \(getMeanTimeBetweenLeaving())" +
-              "\nMean client time in model = \(getMeanClientsTimeInModel())" +
+              "\nMean item time in model = \(getMeanItemsTimeInModel())" +
               "\nFailure probabilty = \(getFailureProbability())" +
               "\nSwaps count = \(swapCount)"
         )
 //        writeToCsv()
     }
     
-    func getMeanClientsCountInModel() -> Double {
+    func getMeanItemsCountInModel() -> Double {
         return elements.filter { $0 is Process }.map { $0 as! Process }.reduce(0) { partialResult, process in
 //            let meanClients = process.totalLoadTime / Double(process.quantity)
             return partialResult + (process.meanQueue + process.totalLoadTime) / tCurr
@@ -117,12 +115,13 @@ class Model<T> {
         }
     }
     
-    func getMeanClientsTimeInModel() -> Double {
+    func getMeanItemsTimeInModel() -> Double {
         let processes = elements.filter { $0 is Process }.map { $0 as! Process }
         let totalClientsTimeInBank = processes.reduce(0) { partialResult, process in
-            return partialResult + process.totalLoadTime + process.meanQueue
+            return partialResult + process.totalLoadTime + process.meanQueue // Double(process.quantity) + process.meanQueue
         }
-        return totalClientsTimeInBank / processes.reduce(0) { $0 + Double($1.quantity) }
+        let creator = elements.first(where: { $0 is Create }) as? Create
+        return totalClientsTimeInBank / Double(creator?.quantity ?? 1) // processes.reduce(0) { $0 + Double($1.quantity) }
     }
     
     func getFailureProbability() -> Double {
