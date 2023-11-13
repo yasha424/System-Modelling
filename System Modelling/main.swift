@@ -140,7 +140,7 @@ func hospitalTask() {
         name: "Analysis",
         maxQueue: Int.max,
         channels: 2,
-        chooseBy: .probability
+        chooseBy: .byCondition
     ) { _ in
         FunRand.erlang(timeMean: 4, k: 2)
     }
@@ -175,10 +175,10 @@ func hospitalTask() {
     labRegistration.nextElements = [.init(element: analysis, probability: 1)]
     
     analysis.nextElements = [
-        .init(element: goingToRegistration, probability: 0.5, itemGenerator: { Patient(type: 1) }),
-        .init(element: dispose, probability: 0.5)
+        .init(element: goingToRegistration, condition: { $0.type == 2 }) { Patient(type: 1) },
+        .init(element: dispose) { $0.type == 3 }
     ]
-    
+        
     goingToRegistration.nextElements = [.init(element: registration, probability: 1)]
             
     let model = Model(elements: [patients, registration, goingToWards, goingToLab, labRegistration, analysis, goingToRegistration])
@@ -187,6 +187,7 @@ func hospitalTask() {
 }
 
 func main() {
+//    task1()
 //    bankTask()
     hospitalTask()
 }
