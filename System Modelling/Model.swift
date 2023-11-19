@@ -8,7 +8,7 @@
 import Foundation
 
 class Model<T> {
-    private let elements: [Element<T>]
+    private var elements: [Element<T>]
     private(set) var tNext, tCurr: Double
 //    private static var csvString = ""
     private var swapCount: Int = 0
@@ -19,9 +19,21 @@ class Model<T> {
         tCurr = tNext
     }
     
+    init(withNumProcesses n: Int) {
+        tNext = 0
+        tCurr = tNext
+        
+        self.elements = [Create(delays: [.init(delayMean: 1, probability: 1)], name: "", chooseBy: .probability)]
+        
+        for i in 1...n {
+            self.elements.append(Process { _ in return 1 })
+            self.elements[i - 1].nextElements = [NextElement(element: self.elements[i], probability: 1)]
+        }
+    }
+    
     func simulate(forTime time: Double, swapDifference: Int? = nil) {
         while tCurr < time {
-            var nextEvent: Element<T>?
+//            var nextEvent: Element<T>?
             tNext = Double.greatestFiniteMagnitude
             for element in elements {
                 if element.tNext < tNext {
@@ -30,9 +42,9 @@ class Model<T> {
                 }
             }
             
-            if let event = nextEvent {
-                print("\nIt's time for event in \(event.name), time = \(tNext)")
-            }
+//            if let event = nextEvent {
+//                print("\nIt's time for event in \(event.name), time = \(tNext)")
+//            }
                         
             for element in elements {
                 element.doStatistics(delta: tNext - tCurr)
@@ -53,9 +65,9 @@ class Model<T> {
                 tryToSwapQueue(swapDifference)
             }
 
-            printInfo()
+//            printInfo()
         }
-        printResult()
+//        printResult()
     }
     
     func tryToSwapQueue(_ swapDifference: Int) {

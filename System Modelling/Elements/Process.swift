@@ -16,7 +16,7 @@ class Process<T>: Element<T> {
     private(set) var totalLoadTime: Double = 0
     var getDelay: (_ item: T?) -> Double
     
-    init(name: String, maxQueue: Int, channels: UInt, chooseBy type: NextElementsChooseType, delay: @escaping (_ item: T?) -> Double) {
+    init(name: String = "", maxQueue: Int = Int.max, channels: UInt = 1, chooseBy type: NextElementsChooseType = .probability, delay: @escaping (_ item: T?) -> Double) {
         self.maxQueue = maxQueue
         self.getDelay = delay
         
