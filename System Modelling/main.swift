@@ -8,11 +8,11 @@
 import Foundation
 
 func main() {
-    let modelStructure: ModelStructure = .first
+    let modelStructure: ModelStructure = .second
     
     var results = [Int: Double]()
     for n in stride(from: 10, through: 250, by: 10) {
-        let count = 1
+        let count = 10
 
         results[n] = 0.0
         for _ in 0..<count {
@@ -29,7 +29,7 @@ func main() {
         print(result.key, result.value)
     }
     
-    writeToCsv(results: sortedResults, fileName: "results1.csv")
+    writeToCsv(results: sortedResults, fileName: "results2.csv")
 }
 
 func writeToCsv(results: Array<(key: Int, value: Double)>, fileName: String) {

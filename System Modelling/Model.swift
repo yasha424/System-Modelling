@@ -22,35 +22,7 @@ class Model<T> {
         tNext = 0
         tCurr = tNext
     }
-    
-    init(withNumProcesses n: Int, structure: ModelStructure = .first) {
-        tNext = 0
-        tCurr = tNext
         
-        
-        self.elements = [Create(delays: [.init(delayMean: 1, probability: 1)], name: "", chooseBy: .probability)]
-        
-        if structure == .first {
-            for i in 1...n {
-                self.elements.append(Process { _ in return 1 })
-                self.elements[i - 1].nextElements = [NextElement(element: self.elements[i], probability: 1)]
-            }
-        } else {
-            self.elements[0].nextElements = []
-            for i in 1...n {
-                self.elements.append(Process { _ in return 1 })
-//                let process = Process { _ in return 1 }
-//                process.nextElements = []
-                self.elements[i].nextElements = []
-                for j in 0..<i {
-                    self.elements[j].nextElements?.append(NextElement(element: self.elements[i], probability: 1 / Double(n - j)))
-                }
-
-//                self.elements(
-            }
-        }
-    }
-    
     func simulate(forTime time: Double, swapDifference: Int? = nil) {
         while tCurr < time {
 //            var nextEvent: Element<T>?
@@ -192,4 +164,27 @@ class Model<T> {
 //            try Model.csvString.write(to: fileURL, atomically: true, encoding: .utf8)
 //        } catch {}
 //    }
+}
+
+extension Model {
+    convenience init(withNumProcesses n: Int, structure: ModelStructure = .first) {
+        self.init(elements: [])
+        self.elements = [Create(delays: [.init(delayMean: 1, probability: 1)], name: "", chooseBy: .probability)]
+        
+        if structure == .first {
+            for i in 1...n {
+                self.elements.append(Process { _ in return 1 })
+                self.elements[i - 1].nextElements = [NextElement(element: self.elements[i], probability: 1)]
+            }
+        } else {
+            self.elements[0].nextElements = []
+            for i in 1...n {
+                self.elements.append(Process { _ in return 1 })
+                self.elements[i].nextElements = []
+                for j in 0..<i {
+                    self.elements[j].nextElements?.append(NextElement(element: self.elements[i], probability: 1 / Double(n - j)))
+                }
+            }
+        }
+    }
 }
