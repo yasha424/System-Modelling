@@ -7,8 +7,12 @@
 
 import Foundation
 
+enum ModelStructure {
+    case first, second
+}
+
 class Model<T> {
-    private var elements: [Element<T>]
+    private(set) var elements: [Element<T>]
     private(set) var tNext, tCurr: Double
 //    private static var csvString = ""
     private var swapCount: Int = 0
@@ -19,15 +23,31 @@ class Model<T> {
         tCurr = tNext
     }
     
-    init(withNumProcesses n: Int) {
+    init(withNumProcesses n: Int, structure: ModelStructure = .first) {
         tNext = 0
         tCurr = tNext
         
+        
         self.elements = [Create(delays: [.init(delayMean: 1, probability: 1)], name: "", chooseBy: .probability)]
         
-        for i in 1...n {
-            self.elements.append(Process { _ in return 1 })
-            self.elements[i - 1].nextElements = [NextElement(element: self.elements[i], probability: 1)]
+        if structure == .first {
+            for i in 1...n {
+                self.elements.append(Process { _ in return 1 })
+                self.elements[i - 1].nextElements = [NextElement(element: self.elements[i], probability: 1)]
+            }
+        } else {
+            self.elements[0].nextElements = []
+            for i in 1...n {
+                self.elements.append(Process { _ in return 1 })
+//                let process = Process { _ in return 1 }
+//                process.nextElements = []
+                self.elements[i].nextElements = []
+                for j in 0..<i {
+                    self.elements[j].nextElements?.append(NextElement(element: self.elements[i], probability: 1 / Double(n - j)))
+                }
+
+//                self.elements(
+            }
         }
     }
     
@@ -38,7 +58,7 @@ class Model<T> {
             for element in elements {
                 if element.tNext < tNext {
                     tNext = element.tNext
-                    nextEvent = element
+//                    nextEvent = element
                 }
             }
             

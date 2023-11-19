@@ -133,7 +133,7 @@ class Element<T> {
         
         if nextElements.contains(where: { $0.probability == nil }) {
             throw NextElementError.undefinedProbability
-        } else if nextElements.reduce(0, { $0 + $1.probability! }) != 1 {
+        } else if !(0.9999999...1.0000001 ~= nextElements.reduce(0, { $0 + $1.probability! })) {
             throw NextElementError.probabilitySumNotEqualToOne
         }
         
